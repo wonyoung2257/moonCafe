@@ -21,6 +21,8 @@
 // 2. 유사한 것을 묶어서 관리한다. -> eventListener
 // 3. 코드의 통일성을 올린다. -> 문자열을 수정하던 것을 ->render함수로 대체함
 // 4. 중복되는 코드를 지운다. -> count하는 함수를 중복되던 것을 지움
+// step 3
+// 1. js에서 키 벨류 이름이 같으면 하나만 적어도 된다.
 
 // //step2 요구사항
 // ㅁ localStorage Read & Write
@@ -51,6 +53,7 @@
 // 서버에 메뉴가 수정 될 수 있도록 요청한다.
 // 서버에 메뉴 품절상태를 토클될 수 있도록 요청한다.
 // 서버에 메뉴가 삭제 될 수 있도록 요청한다.
+// async, await - 순서를 보장해주고 싶은 곳에 await를 붙인다. 서버와 통신하는 부분만 뭍인다.
 import { $ } from "./utils/dom.js";
 import store from "./store/index.js";
 
@@ -69,10 +72,10 @@ const MenuApi = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: name }),
+      body: JSON.stringify({ name }),
     });
     if (!response.ok) {
-      console.log("에러가 발생했습니다.");
+      console.error("에러가 발생했습니다.");
     }
   },
   async updateMenu(category, name, menuId) {
@@ -84,9 +87,25 @@ const MenuApi = {
       body: JSON.stringify({ name }),
     });
     if (!response.ok) {
-      console.log("에러가 발생했습니다.");
+      console.error("에러가 발생했습니다.");
     }
     return response.json();
+  },
+  async toggleSoldOut(category, menuId) {
+    const response = await fetch(`${BASE_URL}/category/${category}/menu/${menuId}/soldout`, {
+      method: "PUT",
+    });
+    if (!response.ok) {
+      console.error("에러가 발생했습니다.");
+    }
+  },
+  async deleteMenu(category, menuId) {
+    const response = await fetch(`${BASE_URL}/category/${category}/menu/${menuId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      console.error("에러가 발생했습니다.");
+    }
   },
 };
 
@@ -108,11 +127,11 @@ function App() {
 
   const render = () => {
     const template = this.menu[this.currentCategory]
-      .map((item, index) => {
+      .map((item) => {
         // 태크의 data 값 찾아보기
         return `
         <li data-menu-id="${item.id}" class=" menu-list-item d-flex items-center py-2">
-        <span class=" ${item.soldOut ? "sold-out" : ""} w-100 pl-2 menu-name">${item.name}</span>
+        <span class=" ${item.isSoldOut ? "sold-out" : ""} w-100 pl-2 menu-name">${item.name}</span>
         <button
           type="button"
           class="bg-gray-50 text-gray-500 text-sm mr-1 menu-sold-out-button"
@@ -173,19 +192,22 @@ function App() {
     render();
   };
 
-  const removeMenuName = (e) => {
+  const removeMenuName = async (e) => {
     if (confirm("삭제하시겠습니까?")) {
       const menuId = e.target.closest("li").dataset.menuId;
-      this.menu[this.currentCategory].splice(menuId, 1);
-      store.setLocalStorage(this.menu);
+      await MenuApi.deleteMenu(this.currentCategory, menuId);
+      this.menu[this.currentCategory] = await MenuApi.getAllMenuByCategory(this.currentCategory);
+      // this.menu[this.currentCategory].splice(menuId, 1);
+      // store.setLocalStorage(this.menu);
       render();
     }
   };
 
-  const soldOutMenu = (e) => {
+  const soldOutMenu = async (e) => {
     const menuId = e.target.closest("li").dataset.menuId;
-    this.menu[this.currentCategory][menuId].soldOut = !this.menu[this.currentCategory][menuId].soldOut;
-    store.setLocalStorage(this.menu);
+    await MenuApi.toggleSoldOut(this.currentCategory, menuId);
+    this.menu[this.currentCategory] = await MenuApi.getAllMenuByCategory(this.currentCategory);
+
     render();
   };
 

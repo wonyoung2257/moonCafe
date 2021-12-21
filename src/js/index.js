@@ -43,8 +43,39 @@
 // 3.품절 버튼을 클릭하면 localStorage에 상태갑이 저장된다.
 // 4.품정 해당메뉴의 상태값이 페이지에 그려진다.
 // 5.클릭이벤트에서 해당 class속성 값에 sold-out을 추가한다.
+
+//step3 요구사항
+// 웹 서버를 띄운다.
+// 서버에 새로운 메뉴명을 추가될 수 있도록 요청한다.
+// 서버에 카테고리별 메뉴리스트를 불러온다.
+// 서버에 메뉴가 수정 될 수 있도록 요청한다.
+// 서버에 메뉴 품절상태를 토클될 수 있도록 요청한다.
+// 서버에 메뉴가 삭제 될 수 있도록 요청한다.
 import { $ } from "./utils/dom.js";
 import store from "./store/index.js";
+
+const BASE_URL = "http://localhost:3000/api";
+
+const MenuApi = {
+  async getAllMenuByCategory(category) {
+    // 이 부분 다시 공부해보기
+    // then에서의 리턴은 then에서만 받을 수 있음
+    const response = await fetch(`${BASE_URL}/category/${category}/menu`);
+    return response.json();
+  },
+  async createMenu(category, name) {
+    const response = await fetch(`${BASE_URL}/category/${category}/menu`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: name }),
+    });
+    if (!response.ok) {
+      console.log("에러가 발생했습니다.");
+    }
+  },
+};
 
 function App() {
   // 상태는 변하는 값 - 메뉴명
@@ -56,10 +87,8 @@ function App() {
     desert: [],
   };
   this.currentCategory = "espresso";
-  this.init = () => {
-    if (store.getLocalStorage()) {
-      this.menu = store.getLocalStorage();
-    }
+  this.init = async () => {
+    this.menu[this.currentCategory] = await MenuApi.getAllMenuByCategory(this.currentCategory);
     render();
     initEventListeners();
   };
@@ -105,17 +134,20 @@ function App() {
     $("#menu-name").value = "";
   };
 
-  const addMenuName = () => {
+  const addMenuName = async () => {
     if ($("#menu-name").value === "") {
       alert("값을 입력해주세요");
       return;
     }
 
     const menuName = $("#menu-name").value;
-    this.menu[this.currentCategory].push({ name: menuName });
-    store.setLocalStorage(this.menu);
+
+    await MenuApi.createMenu(this.currentCategory, menuName);
+    this.menu[this.currentCategory] = await MenuApi.getAllMenuByCategory(this.currentCategory);
     render();
     $("#menu-name").value = "";
+
+    // this.menu[this.currentCategory].push({ name: menuName }); 로컬 전용
   };
 
   const updateMenuName = (e) => {

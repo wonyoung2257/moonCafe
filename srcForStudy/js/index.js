@@ -1,6 +1,6 @@
 // 1. 요구사항 정리
 // - 추가 -
-// [ ] 에스프레소 메뉴에 새로운 메뉴를 확인버튼 클릭으로 추가한다.
+// [x] 에스프레소 메뉴에 새로운 메뉴를 확인버튼 클릭으로 추가한다.
 //     [ ] 엔터키 입렵으로 추가한다.
 // [ ] 메뉴 추가 후 input은 빈 값으로 초기화 한다.
 // [ ] 사용자 입력값이 빈값이면 추가하지 않는다.
@@ -16,35 +16,44 @@
 
 const $ = (tag) => document.querySelector(tag);
 
-// 클릭해서 추가하기
-$("#menu-submit-button").addEventListener("click", () => {
-  const menuName = $("#menu-name").value;
-  const menuTemplate = `
-    <li class="menu-list-item d-flex items-center py-2">
-      <span class="w-100 pl-2 menu-name">${menuName}</span>
-      <button
-        type="button"
-        class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
-      >
-        수정
-      </button>
-      <button
-        type="button"
-        class="bg-gray-50 text-gray-500 text-sm menu-remove-button"
-      >
-        삭제
-      </button>
-    </li>`;
-  $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate);
-});
-console.log("테스트");
+function APP() {
+  const addMenu = (menuName) => {
+    const menuTemplate = `
+      <li class="menu-list-item d-flex items-center py-2">
+        <span class="w-100 pl-2 menu-name">${menuName}</span>
+        <button
+          type="button"
+          class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
+        >
+          수정
+        </button>
+        <button
+          type="button"
+          class="bg-gray-50 text-gray-500 text-sm menu-remove-button"
+        >
+          삭제
+        </button>
+      </li>`;
+    $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate);
+  };
 
-// 엔터키로 추가하기
-$("#menu-name").addEventListener("keypress", (e) => {
-  // e.preventDefalut();
-  // if (e.key === "Enter") {
-  //   e.preventDefault();
-  //   return;
-  // }
-  console.log(e.key);
-});
+  $("#menu-form").addEventListener("keypress", (e) => {
+    e.preventDefault();
+  });
+  // 클릭해서 추가하기
+  $("#menu-submit-button").addEventListener("click", () => {
+    const menuName = $("#menu-name").value;
+    addMenu(menuName);
+  });
+  console.log("테스트");
+
+  // 엔터키로 추가하기
+  $("#menu-name").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      const menuName = $("#menu-name").value;
+      addMenu(menuName);
+    }
+  });
+}
+
+const app = new APP();

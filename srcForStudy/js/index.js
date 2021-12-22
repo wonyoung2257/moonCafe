@@ -7,8 +7,8 @@
 // [x] 총 메뉴 갯수를 count하여 상단에 보여준다.
 //     - 추가되는 메뉴의 아래 마크업은 <ul id="espresso-menu-list" class="mt-3 pl-0"></ul> 안에 삽입해야 한다.
 // - 수정 -
-// [ ] 수정 버튼을 누르면 메뉴 이름을 입력할 수 있는 prompt를 띄운다.
-// [ ] prompt의 확인 창을 누르면 입력한 값으로 메뉴 명이 바뀐다.
+// [x] 수정 버튼을 누르면 메뉴 이름을 입력할 수 있는 prompt를 띄운다.
+// [X] prompt의 확인 창을 누르면 입력한 값으로 메뉴 명이 바뀐다.
 // - 삭제 -
 // [ ] 삭제 버튼을 누르면 confirm 창을 띄운다.
 // [ ] confirm 에서 확인을 누르면 메뉴가 삭제 된다.
@@ -17,8 +17,9 @@
 const $ = (tag) => document.querySelector(tag);
 
 function APP() {
-  const addMenuName = (menuName) => {
-    const menuTemplate = `
+  const addMenuName = () => {
+    const menuTemplate = (menuName) => {
+      return `
       <li class="menu-list-item d-flex items-center py-2">
         <span class="w-100 pl-2 menu-name">${menuName}</span>
         <button
@@ -34,31 +35,43 @@ function APP() {
           삭제
         </button>
       </li>`;
+    };
+    const menuName = $("#menu-name").value;
+
     if (menuName === "") {
       alert("메뉴 이름을 입력해주세요");
       return;
     }
-    $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate);
+    $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate(menuName));
+
     const menuCount = $("#menu-list").querySelectorAll("li").length;
     $(".menu-count").innerText = `총 ${menuCount}개`;
     $("#menu-name").value = "";
   };
+
+  $("#menu-list").addEventListener("click", (e) => {
+    console.log();
+    const menuName = e.target.closest("li").querySelector(".menu-name");
+    if (e.target.classList.contains("menu-edit-button")) {
+      const changeMenu = prompt("수정할 이름을 입력해주세요", menuName.innerText);
+      menuName.innerText = changeMenu;
+    }
+  });
 
   $("#menu-form").addEventListener("keypress", (e) => {
     e.preventDefault();
   });
   // 클릭해서 추가하기
   $("#menu-submit-button").addEventListener("click", () => {
-    const menuName = $("#menu-name").value;
-    addMenuName(menuName);
+    addMenuName();
   });
 
   // 엔터키로 추가하기
   $("#menu-name").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      const menuName = $("#menu-name").value;
-      addMenuName(menuName);
+    if (e.key !== "Enter") {
+      return;
     }
+    addMenuName();
   });
 }
 

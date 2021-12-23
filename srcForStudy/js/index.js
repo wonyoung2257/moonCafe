@@ -12,12 +12,17 @@
 // - 삭제 -
 // [x] 삭제 버튼을 누르면 confirm 창을 띄운다.
 // [x] confirm 에서 확인을 누르면 메뉴가 삭제 된다.
-// [x] 삭제 되면 총 메뉴 갯수도 수정한다.
+// [x ] 삭제 되면 총 메뉴 갯수도 수정한다.
 
 const $ = (tag) => document.querySelector(tag);
 
 function APP() {
   const addMenuName = () => {
+    const menuName = $("#menu-name").value;
+    if (menuName === "") {
+      alert("메뉴 이름을 입력해주세요");
+      return;
+    }
     const menuTemplate = (menuName) => {
       return `
       <li class="menu-list-item d-flex items-center py-2">
@@ -36,35 +41,40 @@ function APP() {
         </button>
       </li>`;
     };
-    const menuName = $("#menu-name").value;
 
-    if (menuName === "") {
-      alert("메뉴 이름을 입력해주세요");
-      return;
-    }
     $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate(menuName));
+    updateMenuCount();
+  };
 
+  const updateMenuCount = function () {
     const menuCount = $("#menu-list").querySelectorAll("li").length;
     $(".menu-count").innerText = `총 ${menuCount}개`;
     $("#menu-name").value = "";
   };
 
+  const updateMenuName = (e) => {
+    const $menuName = e.target.closest("li").querySelector(".menu-name");
+    const changeMenu = prompt("수정할 이름을 입력해주세요", $menuName.innerText);
+    $menuName.innerText = changeMenu;
+  };
+
+  const removeMenuName = (e) => {
+    if (confirm("삭제하시겠습니까?")) {
+      e.target.closest("li").remove();
+      updateMenuCount();
+    }
+  };
+
   $("#menu-list").addEventListener("click", (e) => {
-    const menuName = e.target.closest("li").querySelector(".menu-name");
     if (e.target.classList.contains("menu-edit-button")) {
-      const changeMenu = prompt("수정할 이름을 입력해주세요", menuName.innerText);
-      menuName.innerText = changeMenu;
+      updateMenuName(e);
     }
     if (e.target.classList.contains("menu-remove-button")) {
-      if (confirm("삭제하시겠습니까?")) {
-        e.target.closest("li").remove();
-        const menuCount = $("#menu-list").querySelectorAll("li").length;
-        $(".menu-count").innerText = `총 ${menuCount}개`;
-      }
+      removeMenuName(e);
     }
   });
 
-  $("#menu-form").addEventListener("keypress", (e) => {
+  $("#menu-form").addEventListener("submit", (e) => {
     e.preventDefault();
   });
   // 클릭해서 추가하기

@@ -16,32 +16,67 @@
 
 // step2 요구사항 정리
 //  - localStorage -
-// [ ] localStorage에 메뉴 데이터를 저장한다.
-// [ ] localStorage에 저장 된 데이터를 불러온다.
-// [ ] 최초 접속시 에스프레소 메뉴를 localStorage에서 불러와 우선 보이게 한다.
+// [x] localStorage에 메뉴 데이터를 저장한다.
+// [x] localStorage에 저장 된 데이터를 불러온다.
+
 //  - 각각 메뉴 관리 부분
+// [ ] 메뉴판을 버튼을 클릭하여 메뉴판을 변경할 수 있다.
 // [ ] 에스프레소 메뉴판을 관리할 수 있다.
 // [ ] 프라푸치노 메뉴판을 관리할 수 있다.
 // [ ] 블렌디드 메뉴판을 관리할 수 있다.
 // [ ] 티바나 메뉴판을 관리할 수 있다.
 // [ ] 디저트 메뉴판을 관리할 수 있다.
+// [ ] 최초 접속시 에스프레소 메뉴를 localStorage에서 불러와 우선 보이게 한다.
 //   - 품절 처리 부분 -
 // [ ] 품절버튼을 추가한다.
 // [ ] 버튼 클릭시 sold-out class를 추가하여 상태를 토글로 변경한다.
 
+/**
+ * 메뉴는 배열로 들어가야함
+ * 메뉴를 가지는 배열을 만들어서 localStorage에 저장
+ * 배열을 순환하여 메뉴판에 보여준다.
+ */
+
 const $ = (tag) => document.querySelector(tag);
 
+const store = {
+  setLocalStorage(menu) {
+    localStorage.setItem("menu", JSON.stringify(menu));
+  },
+  getLocalStorage() {
+    return JSON.parse(localStorage.getItem("menu"));
+  },
+};
+
 function APP() {
+  this.menu = [];
+  this.init = () => {
+    if (store.getLocalStorage().length > 0) {
+      this.menu = store.getLocalStorage();
+      render();
+    }
+  };
+
   const addMenuName = () => {
     const menuName = $("#menu-name").value;
     if (menuName === "") {
       alert("메뉴 이름을 입력해주세요");
       return;
     }
-    const menuTemplate = (menuName) => {
-      return `
+
+    // $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate(menuName));
+    this.menu.push({ name: menuName });
+    store.setLocalStorage(this.menu);
+    render();
+    updateMenuCount();
+  };
+
+  const render = () => {
+    const menuTemplate = this.menu
+      .map((meneItem) => {
+        return `
       <li class="menu-list-item d-flex items-center py-2">
-        <span class="w-100 pl-2 menu-name">${menuName}</span>
+        <span class="w-100 pl-2 menu-name">${meneItem.name}</span>
         <button
           type="button"
           class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
@@ -55,9 +90,9 @@ function APP() {
           삭제
         </button>
       </li>`;
-    };
-
-    $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate(menuName));
+      })
+      .join("");
+    $("#menu-list").innerHTML = menuTemplate;
     updateMenuCount();
   };
 
@@ -107,3 +142,4 @@ function APP() {
 }
 
 const app = new APP();
+app.init();

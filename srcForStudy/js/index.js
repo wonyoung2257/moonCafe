@@ -10,9 +10,9 @@
 // [x] 수정 버튼을 누르면 메뉴 이름을 입력할 수 있는 prompt를 띄운다.
 // [X] prompt의 확인 창을 누르면 입력한 값으로 메뉴 명이 바뀐다.
 // - 삭제 -
-// [ ] 삭제 버튼을 누르면 confirm 창을 띄운다.
-// [ ] confirm 에서 확인을 누르면 메뉴가 삭제 된다.
-// [ ] 삭제 되면 총 메뉴 갯수도 수정한다.
+// [x] 삭제 버튼을 누르면 confirm 창을 띄운다.
+// [x] confirm 에서 확인을 누르면 메뉴가 삭제 된다.
+// [x] 삭제 되면 총 메뉴 갯수도 수정한다.
 
 const $ = (tag) => document.querySelector(tag);
 
@@ -50,11 +50,17 @@ function APP() {
   };
 
   $("#menu-list").addEventListener("click", (e) => {
-    console.log();
     const menuName = e.target.closest("li").querySelector(".menu-name");
     if (e.target.classList.contains("menu-edit-button")) {
       const changeMenu = prompt("수정할 이름을 입력해주세요", menuName.innerText);
       menuName.innerText = changeMenu;
+    }
+    if (e.target.classList.contains("menu-remove-button")) {
+      if (confirm("삭제하시겠습니까?")) {
+        e.target.closest("li").remove();
+        const menuCount = $("#menu-list").querySelectorAll("li").length;
+        $(".menu-count").innerText = `총 ${menuCount}개`;
+      }
     }
   });
 

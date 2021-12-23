@@ -28,19 +28,11 @@
 // [x] 디저트 메뉴판을 관리할 수 있다.
 // [x] 최초 접속시 에스프레소 메뉴를 localStorage에서 불러와 우선 보이게 한다.
 //   - 품절 처리 부분 -
-// [ ] 품절버튼을 추가한다.
-// [ ] 버튼 클릭시 sold-out class를 추가하여 상태를 토글로 변경한다.
+// [x] 품절버튼을 추가한다.
+// [x] 버튼 클릭시 sold-out class를 추가하여 상태를 토글로 변경한다.
 
-const $ = (tag) => document.querySelector(tag);
-
-const store = {
-  setLocalStorage(menu) {
-    localStorage.setItem("menu", JSON.stringify(menu));
-  },
-  getLocalStorage() {
-    return JSON.parse(localStorage.getItem("menu"));
-  },
-};
+import { $ } from "./utils/dom.js";
+import store from "./store/store.js";
 
 function APP() {
   this.menu = {
@@ -65,8 +57,6 @@ function APP() {
       return;
     }
 
-    // $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate(menuName));
-    console.log(this.menu["espresso"]);
     this.menu[this.currentCartagory].push({ name: menuName });
     store.setLocalStorage(this.menu);
     render();
@@ -104,16 +94,17 @@ function APP() {
     updateMenuCount();
   };
 
-  const updateMenuCount = function () {
-    const menuCount = $("#menu-list").querySelectorAll("li").length;
+  const updateMenuCount = () => {
+    // 화살표 함수의 this와 익명함수 this가 서로 다른 객체를 가르켜 에러 발생
+    const menuCount = this.menu[this.currentCartagory].length;
     $(".menu-count").innerText = `총 ${menuCount}개`;
     $("#menu-name").value = "";
   };
 
   const updateMenuName = (e) => {
     const menuId = e.target.closest("li").dataset.menuId;
-    const changeMenu = prompt("수정할 이름을 입력해주세요", this.menu[this.currentCartagory][menuId].name);
-    this.menu[this.currentCartagory][menuId].name = changeMenu;
+    const changeMenuName = prompt("수정할 이름을 입력해주세요", this.menu[this.currentCartagory][menuId].name);
+    this.menu[this.currentCartagory][menuId].name = changeMenuName;
     store.setLocalStorage(this.menu);
     render();
   };
@@ -121,11 +112,20 @@ function APP() {
   const removeMenuName = (e) => {
     if (confirm("삭제하시겠습니까?")) {
       const menuId = e.target.closest("li").dataset.menuId;
-      console.log(menuId);
       this.menu[this.currentCartagory].splice(menuId, 1);
       store.setLocalStorage(this.menu);
       render();
       updateMenuCount();
+    }
+  };
+
+  const toggleSoldOut = (e) => {
+    const toggleSoldOut = e.target.closest("li").querySelector("span").classList.contains("sold-out");
+    console.log(toggleSoldOut);
+    if (!toggleSoldOut) {
+      e.target.closest("li").querySelector("span").classList.add("sold-out");
+    } else {
+      e.target.closest("li").querySelector("span").classList.remove("sold-out");
     }
   };
 
@@ -146,13 +146,7 @@ function APP() {
       removeMenuName(e);
     }
     if (e.target.classList.contains("menu-sold-out-button")) {
-      const toggleSoldOut = e.target.closest("li").querySelector("span").classList.contains("sold-out");
-      console.log(toggleSoldOut);
-      if (!toggleSoldOut) {
-        e.target.closest("li").querySelector("span").classList.add("sold-out");
-      } else {
-        e.target.closest("li").querySelector("span").classList.remove("sold-out");
-      }
+      toggleSoldOut(e);
     }
   });
 

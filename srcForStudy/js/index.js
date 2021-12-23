@@ -49,9 +49,16 @@ const store = {
 };
 
 function APP() {
-  this.menu = [];
+  this.menu = {
+    espresso: [],
+    frappuccino: [],
+    blended: [],
+    teavana: [],
+    desert: [],
+  };
+  this.currentCartagory = "espresso";
   this.init = () => {
-    if (store.getLocalStorage().length > 0) {
+    if (store.getLocalStorage() !== null) {
       this.menu = store.getLocalStorage();
       render();
     }
@@ -65,17 +72,18 @@ function APP() {
     }
 
     // $("#menu-list").insertAdjacentHTML("beforeend", menuTemplate(menuName));
-    this.menu.push({ name: menuName });
+    console.log(this.menu["espresso"]);
+    this.menu[this.currentCartagory].push({ name: menuName });
     store.setLocalStorage(this.menu);
     render();
     updateMenuCount();
   };
 
   const render = () => {
-    const menuTemplate = this.menu
-      .map((meneItem) => {
+    const menuTemplate = this.menu[this.currentCartagory]
+      .map((meneItem, index) => {
         return `
-      <li class="menu-list-item d-flex items-center py-2">
+      <li data-menu-id = ${index} class="menu-list-item d-flex items-center py-2">
         <span class="w-100 pl-2 menu-name">${meneItem.name}</span>
         <button
           type="button"
@@ -103,17 +111,32 @@ function APP() {
   };
 
   const updateMenuName = (e) => {
-    const $menuName = e.target.closest("li").querySelector(".menu-name");
-    const changeMenu = prompt("수정할 이름을 입력해주세요", $menuName.innerText);
-    $menuName.innerText = changeMenu;
+    const menuId = e.target.closest("li").dataset.menuId;
+    const changeMenu = prompt("수정할 이름을 입력해주세요", this.menu[this.currentCartagory][menuId].name);
+    this.menu[this.currentCartagory][menuId].name = changeMenu;
+    store.setLocalStorage(this.menu);
+    render();
   };
 
   const removeMenuName = (e) => {
     if (confirm("삭제하시겠습니까?")) {
-      e.target.closest("li").remove();
+      const menuId = e.target.closest("li").dataset.menuId;
+      console.log(menuId);
+      this.menu[this.currentCartagory].splice(menuId, 1);
+      store.setLocalStorage(this.menu);
+      render();
       updateMenuCount();
     }
   };
+
+  $("nav").addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON") {
+      const menuTitle = e.target.innerText;
+      this.currentCartagory = e.target.dataset.categoryName;
+      $("#category-title").innerText = `${menuTitle} 메뉴 관리`;
+      render();
+    }
+  });
 
   $("#menu-list").addEventListener("click", (e) => {
     if (e.target.classList.contains("menu-edit-button")) {

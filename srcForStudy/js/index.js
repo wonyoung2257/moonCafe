@@ -20,22 +20,16 @@
 // [x] localStorage에 저장 된 데이터를 불러온다.
 
 //  - 각각 메뉴 관리 부분
-// [ ] 메뉴판을 버튼을 클릭하여 메뉴판을 변경할 수 있다.
-// [ ] 에스프레소 메뉴판을 관리할 수 있다.
-// [ ] 프라푸치노 메뉴판을 관리할 수 있다.
-// [ ] 블렌디드 메뉴판을 관리할 수 있다.
-// [ ] 티바나 메뉴판을 관리할 수 있다.
-// [ ] 디저트 메뉴판을 관리할 수 있다.
-// [ ] 최초 접속시 에스프레소 메뉴를 localStorage에서 불러와 우선 보이게 한다.
+// [x] 메뉴판을 버튼을 클릭하여 메뉴판을 변경할 수 있다.
+// [x] 에스프레소 메뉴판을 관리할 수 있다.
+// [x] 프라푸치노 메뉴판을 관리할 수 있다.
+// [x] 블렌디드 메뉴판을 관리할 수 있다.
+// [x] 티바나 메뉴판을 관리할 수 있다.
+// [x] 디저트 메뉴판을 관리할 수 있다.
+// [x] 최초 접속시 에스프레소 메뉴를 localStorage에서 불러와 우선 보이게 한다.
 //   - 품절 처리 부분 -
 // [ ] 품절버튼을 추가한다.
 // [ ] 버튼 클릭시 sold-out class를 추가하여 상태를 토글로 변경한다.
-
-/**
- * 메뉴는 배열로 들어가야함
- * 메뉴를 가지는 배열을 만들어서 localStorage에 저장
- * 배열을 순환하여 메뉴판에 보여준다.
- */
 
 const $ = (tag) => document.querySelector(tag);
 
@@ -85,6 +79,12 @@ function APP() {
         return `
       <li data-menu-id = ${index} class="menu-list-item d-flex items-center py-2">
         <span class="w-100 pl-2 menu-name">${meneItem.name}</span>
+        <button
+        type="button"
+        class="bg-gray-50 text-gray-500 text-sm mr-1 menu-sold-out-button"
+        >
+          품절
+        </button>
         <button
           type="button"
           class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
@@ -144,6 +144,15 @@ function APP() {
     }
     if (e.target.classList.contains("menu-remove-button")) {
       removeMenuName(e);
+    }
+    if (e.target.classList.contains("menu-sold-out-button")) {
+      const toggleSoldOut = e.target.closest("li").querySelector("span").classList.contains("sold-out");
+      console.log(toggleSoldOut);
+      if (!toggleSoldOut) {
+        e.target.closest("li").querySelector("span").classList.add("sold-out");
+      } else {
+        e.target.closest("li").querySelector("span").classList.remove("sold-out");
+      }
     }
   });
 

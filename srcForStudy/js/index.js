@@ -61,6 +61,7 @@ function APP() {
     if (store.getLocalStorage() !== null) {
       this.menu = store.getLocalStorage();
       render();
+      initEventListeners();
     }
   };
 
@@ -140,45 +141,47 @@ function APP() {
     render();
   };
 
-  $("nav").addEventListener("click", (e) => {
-    if (e.target.tagName === "BUTTON") {
-      const menuTitle = e.target.innerText;
-      this.currentCartagory = e.target.dataset.categoryName;
-      $("#category-title").innerText = `${menuTitle} 메뉴 관리`;
-      render();
-    }
-  });
+  const initEventListeners = () => {
+    $("nav").addEventListener("click", (e) => {
+      if (e.target.tagName === "BUTTON") {
+        const menuTitle = e.target.innerText;
+        this.currentCartagory = e.target.dataset.categoryName;
+        $("#category-title").innerText = `${menuTitle} 메뉴 관리`;
+        render();
+      }
+    });
 
-  $("#menu-list").addEventListener("click", (e) => {
-    if (e.target.classList.contains("menu-edit-button")) {
-      updateMenuName(e);
-      return;
-    }
-    if (e.target.classList.contains("menu-remove-button")) {
-      removeMenuName(e);
-      return;
-    }
-    if (e.target.classList.contains("menu-sold-out-button")) {
-      soldOutMenu(e);
-      return;
-    }
-  });
+    $("#menu-list").addEventListener("click", (e) => {
+      if (e.target.classList.contains("menu-edit-button")) {
+        updateMenuName(e);
+        return;
+      }
+      if (e.target.classList.contains("menu-remove-button")) {
+        removeMenuName(e);
+        return;
+      }
+      if (e.target.classList.contains("menu-sold-out-button")) {
+        soldOutMenu(e);
+        return;
+      }
+    });
 
-  $("#menu-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
-  // 클릭해서 추가하기
-  $("#menu-submit-button").addEventListener("click", () => {
-    addMenuName();
-  });
+    $("#menu-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
+    // 클릭해서 추가하기
+    $("#menu-submit-button").addEventListener("click", () => {
+      addMenuName();
+    });
 
-  // 엔터키로 추가하기
-  $("#menu-name").addEventListener("keypress", (e) => {
-    if (e.key !== "Enter") {
-      return;
-    }
-    addMenuName();
-  });
+    // 엔터키로 추가하기
+    $("#menu-name").addEventListener("keypress", (e) => {
+      if (e.key !== "Enter") {
+        return;
+      }
+      addMenuName();
+    });
+  };
 }
 
 const app = new APP();

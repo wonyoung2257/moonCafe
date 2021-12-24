@@ -79,10 +79,10 @@ function APP() {
 
   const render = () => {
     const menuTemplate = this.menu[this.currentCartagory]
-      .map((meneItem, index) => {
+      .map((menuItem, index) => {
         return `
       <li data-menu-id = ${index} class="menu-list-item d-flex items-center py-2">
-        <span class="w-100 pl-2 menu-name">${meneItem.name}</span>
+        <span class=" ${menuItem.soldOut ? "sold-out" : ""} w-100 pl-2 menu-name">${menuItem.name}</span>
         <button
         type="button"
         class="bg-gray-50 text-gray-500 text-sm mr-1 menu-sold-out-button"
@@ -133,14 +133,11 @@ function APP() {
     }
   };
 
-  const toggleSoldOut = (e) => {
-    const toggleSoldOut = e.target.closest("li").querySelector("span").classList.contains("sold-out");
-    console.log(toggleSoldOut);
-    if (!toggleSoldOut) {
-      e.target.closest("li").querySelector("span").classList.add("sold-out");
-    } else {
-      e.target.closest("li").querySelector("span").classList.remove("sold-out");
-    }
+  const soldOutMenu = (e) => {
+    const menuId = e.target.closest("li").dataset.menuId;
+    this.menu[this.currentCartagory][menuId].soldOut = !this.menu[this.currentCartagory][menuId].soldOut;
+    store.setLocalStorage(this.menu);
+    render();
   };
 
   $("nav").addEventListener("click", (e) => {
@@ -155,12 +152,15 @@ function APP() {
   $("#menu-list").addEventListener("click", (e) => {
     if (e.target.classList.contains("menu-edit-button")) {
       updateMenuName(e);
+      return;
     }
     if (e.target.classList.contains("menu-remove-button")) {
       removeMenuName(e);
+      return;
     }
     if (e.target.classList.contains("menu-sold-out-button")) {
-      toggleSoldOut(e);
+      soldOutMenu(e);
+      return;
     }
   });
 

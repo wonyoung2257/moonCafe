@@ -32,8 +32,7 @@
 // [x] 버튼 클릭시 sold-out class를 추가하여 상태를 토글로 변경한다.
 /**
  * step 3 요구사항 정리
- * [ ] API 적용하기
- * [ ] fetch 비동기 api를 사용하는 부분을 async await을 사용하여 구현한다.
+ *  - API 적용하기
  * [ ] 메뉴 생성하기 api를 사용하여 메뉴를 추가한다.
  * [ ] 카테코리별 메뉴리스트 불러오기 api를 사용하여 메뉴를 추가한다.
  * [ ] 메뉴 이름 수정하기 api를 사용하여 메뉴 이름을 update한다.
@@ -41,6 +40,7 @@
  * [ ] 메뉴 품점 처리 api를 사용하여 메뉴를 품절처리 한다.
  *
  * [ ] localStorage에 저장하는 로직은 지운다.
+ * [ ] fetch 비동기 api를 사용하는 부분을 async await을 사용하여 구현한다.
  * [ ] API 통신이 실패하는 경우에 대해 사용자가 알 수 있게 alert으로 예외처리를 진행한다.
  * [ ] 중복되는 메뉴는 추가할 수 없다.
  */
@@ -61,7 +61,6 @@ function APP() {
     if (store.getLocalStorage() !== null) {
       this.menu = store.getLocalStorage();
       render();
-      initEventListeners();
     }
   };
 
@@ -80,29 +79,29 @@ function APP() {
 
   const render = () => {
     const menuTemplate = this.menu[this.currentCartagory]
-      .map((menuItem, index) => {
+      .map((meneItem, index) => {
         return `
-      <li data-menu-id = ${index} class="menu-list-item d-flex items-center py-2">
-        <span class=" ${menuItem.soldOut ? "sold-out" : ""} w-100 pl-2 menu-name">${menuItem.name}</span>
-        <button
-        type="button"
-        class="bg-gray-50 text-gray-500 text-sm mr-1 menu-sold-out-button"
-        >
-          품절
-        </button>
-        <button
+        <li data-menu-id = ${index} class="menu-list-item d-flex items-center py-2">
+          <span class="w-100 pl-2 menu-name">${meneItem.name}</span>
+          <button
           type="button"
-          class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
-        >
-          수정
-        </button>
-        <button
-          type="button"
-          class="bg-gray-50 text-gray-500 text-sm menu-remove-button"
-        >
-          삭제
-        </button>
-      </li>`;
+          class="bg-gray-50 text-gray-500 text-sm mr-1 menu-sold-out-button"
+          >
+            품절
+          </button>
+          <button
+            type="button"
+            class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
+          >
+            수정
+          </button>
+          <button
+            type="button"
+            class="bg-gray-50 text-gray-500 text-sm menu-remove-button"
+          >
+            삭제
+          </button>
+        </li>`;
       })
       .join("");
     $("#menu-list").innerHTML = menuTemplate;
@@ -134,54 +133,52 @@ function APP() {
     }
   };
 
-  const soldOutMenu = (e) => {
-    const menuId = e.target.closest("li").dataset.menuId;
-    this.menu[this.currentCartagory][menuId].soldOut = !this.menu[this.currentCartagory][menuId].soldOut;
-    store.setLocalStorage(this.menu);
-    render();
+  const toggleSoldOut = (e) => {
+    const toggleSoldOut = e.target.closest("li").querySelector("span").classList.contains("sold-out");
+    console.log(toggleSoldOut);
+    if (!toggleSoldOut) {
+      e.target.closest("li").querySelector("span").classList.add("sold-out");
+    } else {
+      e.target.closest("li").querySelector("span").classList.remove("sold-out");
+    }
   };
 
-  const initEventListeners = () => {
-    $("nav").addEventListener("click", (e) => {
-      if (e.target.tagName === "BUTTON") {
-        const menuTitle = e.target.innerText;
-        this.currentCartagory = e.target.dataset.categoryName;
-        $("#category-title").innerText = `${menuTitle} 메뉴 관리`;
-        render();
-      }
-    });
+  $("nav").addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON") {
+      const menuTitle = e.target.innerText;
+      this.currentCartagory = e.target.dataset.categoryName;
+      $("#category-title").innerText = `${menuTitle} 메뉴 관리`;
+      render();
+    }
+  });
 
-    $("#menu-list").addEventListener("click", (e) => {
-      if (e.target.classList.contains("menu-edit-button")) {
-        updateMenuName(e);
-        return;
-      }
-      if (e.target.classList.contains("menu-remove-button")) {
-        removeMenuName(e);
-        return;
-      }
-      if (e.target.classList.contains("menu-sold-out-button")) {
-        soldOutMenu(e);
-        return;
-      }
-    });
+  $("#menu-list").addEventListener("click", (e) => {
+    if (e.target.classList.contains("menu-edit-button")) {
+      updateMenuName(e);
+    }
+    if (e.target.classList.contains("menu-remove-button")) {
+      removeMenuName(e);
+    }
+    if (e.target.classList.contains("menu-sold-out-button")) {
+      toggleSoldOut(e);
+    }
+  });
 
-    $("#menu-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-    });
-    // 클릭해서 추가하기
-    $("#menu-submit-button").addEventListener("click", () => {
-      addMenuName();
-    });
+  $("#menu-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
+  // 클릭해서 추가하기
+  $("#menu-submit-button").addEventListener("click", () => {
+    addMenuName();
+  });
 
-    // 엔터키로 추가하기
-    $("#menu-name").addEventListener("keypress", (e) => {
-      if (e.key !== "Enter") {
-        return;
-      }
-      addMenuName();
-    });
-  };
+  // 엔터키로 추가하기
+  $("#menu-name").addEventListener("keypress", (e) => {
+    if (e.key !== "Enter") {
+      return;
+    }
+    addMenuName();
+  });
 }
 
 const app = new APP();

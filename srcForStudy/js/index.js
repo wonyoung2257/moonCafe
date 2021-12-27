@@ -37,70 +37,17 @@
  * [x] 카테코리별 메뉴리스트 불러오기 api를 사용하여 메뉴를 추가한다.
  * [x]] 메뉴 이름 수정하기 api를 사용하여 메뉴 이름을 update한다.
  * [x] 메뉴 삭제하기 api를 사용하여 메뉴를 삭제한다.
- * [ ] 메뉴 품점 처리 api를 사용하여 메뉴를 품절처리 한다.
+ * [x] 메뉴 품점 처리 api를 사용하여 메뉴를 품절처리 한다.
  *
- * [ ] localStorage에 저장하는 로직은 지운다.
- * [ ] fetch 비동기 api를 사용하는 부분을 async await을 사용하여 구현한다.
+ * [x] localStorage에 저장하는 로직은 지운다.
+ * [x] fetch 비동기 api를 사용하는 부분을 async await을 사용하여 구현한다.
  *
- * [ ] API 통신이 실패하는 경우에 대해 사용자가 알 수 있게 alert으로 예외처리를 진행한다.
+ * [x] API 통신이 실패하는 경우에 대해 사용자가 알 수 있게 alert으로 예외처리를 진행한다.
  * [ ] 중복되는 메뉴는 추가할 수 없다.
  */
 
 import { $ } from "./utils/dom.js";
-
-const BASE_URL = "http://localhost:3000";
-
-const MenuApi = {
-  async getAllMenuByCategory(category) {
-    const response = await fetch(`${BASE_URL}/api/category/${category}/menu`);
-    // console.log(response.json());
-    if (!response.ok) {
-      console.error("에러가 발생했습니다.");
-    }
-    return response.json();
-  },
-
-  async createMenu(category, name) {
-    const response = await fetch(`${BASE_URL}/api/category/${category}/menu`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name }),
-    });
-    if (!response.ok) {
-      console.error("에러가 발생했습니다.");
-    }
-  },
-  async updateMenu(category, name, menuId) {
-    const response = await fetch(`${BASE_URL}/api/category/${category}/menu/${menuId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name }),
-    });
-    if (!response.ok) {
-      console.error("에러가 발생했습니다.");
-    }
-  },
-  async deleteMenu(category, menuId) {
-    const response = await fetch(`${BASE_URL}/api/category/${category}/menu/${menuId}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      console.error("에러가 발생했습니다.");
-    }
-  },
-  async toggleSoldOut(category, menuId) {
-    const response = await fetch(`${BASE_URL}/api/category/${category}/menu/${menuId}/soldout`, {
-      method: "PUT",
-    });
-    if (!response.ok) {
-      console.error("에러가 발생했습니다.");
-    }
-  },
-};
+import MenuApi from "./api/index.js";
 
 function APP() {
   this.menu = {
@@ -122,13 +69,8 @@ function APP() {
       alert("메뉴 이름을 입력해주세요");
       return;
     }
-
-    // this.menu[this.currentCartagory].push({ name: menuName });
-    // store.setLocalStorage(this.menu);
     await MenuApi.createMenu(this.currentCartagory, menuName);
     this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
-    // await MenuApi.getAllMenuByCategory(th);
-
     render();
     updateMenuCount();
   };

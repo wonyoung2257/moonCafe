@@ -70,6 +70,12 @@ function APP() {
       alert("메뉴 이름을 입력해주세요");
       return;
     }
+    const duplicateItem = this.menu[this.currentCartagory].find((menuItem) => menuItem.name === menuName);
+    if (duplicateItem) {
+      alert("이미 등록된 메뉴입니다.");
+      $("#menu-name").value = "";
+      return;
+    }
     await MenuApi.createMenu(this.currentCartagory, menuName);
     this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
     render();

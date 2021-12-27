@@ -60,6 +60,7 @@ function APP() {
   this.currentCartagory = "espresso";
   this.init = async () => {
     this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
+    eventListener();
     render();
   };
 
@@ -75,9 +76,10 @@ function APP() {
     updateMenuCount();
   };
 
-  const render = () => {
+  const render = async () => {
+    this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
     const menuTemplate = this.menu[this.currentCartagory]
-      .map((menuItem, index) => {
+      .map((menuItem) => {
         return `
         <li data-menu-id = ${menuItem.id} class="menu-list-item d-flex items-center py-2">
           <span class="${menuItem.isSoldOut ? "sold-out" : ""} w-100 pl-2 menu-name">${menuItem.name}</span>
@@ -118,7 +120,6 @@ function APP() {
     const menuName = e.target.closest("li").querySelector(".menu-name");
     const updatedMenuName = prompt("메뉴명을 수정해 주세요", menuName.innerText);
     await MenuApi.updateMenu(this.currentCartagory, updatedMenuName, menuId);
-    this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
     render();
   };
 
@@ -126,7 +127,6 @@ function APP() {
     if (confirm("삭제하시겠습니까?")) {
       const menuId = e.target.closest("li").dataset.menuId;
       await MenuApi.deleteMenu(this.currentCartagory, menuId);
-      this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
       render();
       updateMenuCount();
     }
@@ -135,47 +135,51 @@ function APP() {
   const toggleSoldOut = async (e) => {
     const menuId = e.target.closest("li").dataset.menuId;
     await MenuApi.toggleSoldOut(this.currentCartagory, menuId);
-    this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
     render();
   };
 
-  $("nav").addEventListener("click", async (e) => {
+  const changeCategory = (e) => {
     if (e.target.tagName === "BUTTON") {
       const menuTitle = e.target.innerText;
       this.currentCartagory = e.target.dataset.categoryName;
       $("#category-title").innerText = `${menuTitle} 메뉴 관리`;
-      this.menu[this.currentCartagory] = await MenuApi.getAllMenuByCategory(this.currentCartagory);
       render();
     }
-  });
+  };
 
-  $("#menu-list").addEventListener("click", (e) => {
-    if (e.target.classList.contains("menu-edit-button")) {
-      updateMenuName(e);
-    }
-    if (e.target.classList.contains("menu-remove-button")) {
-      removeMenuName(e);
-    }
-    if (e.target.classList.contains("menu-sold-out-button")) {
-      toggleSoldOut(e);
-    }
-  });
+  const eventListener = () => {
+    $("nav").addEventListener("click", (e) => {
+      changeCategory(e);
+    });
 
-  $("#menu-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
-  // 클릭해서 추가하기
-  $("#menu-submit-button").addEventListener("click", () => {
-    addMenuName();
-  });
+    $("#menu-list").addEventListener("click", (e) => {
+      if (e.target.classList.contains("menu-edit-button")) {
+        updateMenuName(e);
+      }
+      if (e.target.classList.contains("menu-remove-button")) {
+        removeMenuName(e);
+      }
+      if (e.target.classList.contains("menu-sold-out-button")) {
+        toggleSoldOut(e);
+      }
+    });
 
-  // 엔터키로 추가하기
-  $("#menu-name").addEventListener("keypress", (e) => {
-    if (e.key !== "Enter") {
-      return;
-    }
-    addMenuName();
-  });
+    $("#menu-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
+    // 클릭해서 추가하기
+    $("#menu-submit-button").addEventListener("click", () => {
+      addMenuName();
+    });
+
+    // 엔터키로 추가하기
+    $("#menu-name").addEventListener("keypress", (e) => {
+      if (e.key !== "Enter") {
+        return;
+      }
+      addMenuName();
+    });
+  };
 }
 
 const app = new APP();
